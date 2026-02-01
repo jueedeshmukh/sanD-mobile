@@ -1,11 +1,15 @@
 import React, { useState } from 'react'
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, FlatList } from 'react-native'
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, FlatList, Alert } from 'react-native'
+import { supabase } from '../supabaseClient'
+import { useRouter } from 'expo-router'
 
-export default function OnboardingScreen({ onComplete }: { onComplete?: () => void }) {
+export default function OnboardingScreen() {
+  const router = useRouter()
   const [courses, setCourses] = useState<string[]>([])
   const [currentCourse, setCurrentCourse] = useState('')
   const [isAdding, setIsAdding] = useState(false)
   const [college, setCollege] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const colleges = ['Seventh', 'ERC', 'Marshall', 'Sixth', 'Muir', 'Revelle', 'Eight', 'Warren']
 
@@ -21,12 +25,57 @@ export default function OnboardingScreen({ onComplete }: { onComplete?: () => vo
     setCourses(courses.filter((_, i) => i !== index))
   }
 
-  const handleSubmit = () => {
-    console.log('Onboarding submitted:', { courses, college })
-    if (onComplete) {
-      onComplete()
-    }
+  const handleSubmit = async () => {
+  if (!college) {
+    Alert.alert('Error', 'Please select your college before proceeding.')
+    return
   }
+
+  if (courses.length === 0) {
+    Alert.alert('Error', 'Please add at least one course.')
+    return
+  }
+  
+  setLoading(true)
+
+  try {
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) throw new Error('No user found')
+
+    // Update profile with college
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update({ college: college })
+      .eq('id', user.id)
+      
+    if (profileError) throw profileError
+
+    // Prepare course inserts
+    const courseInserts = courses.map(courseName => ({
+      user_id: user.id,
+      course_name: courseName
+    }))
+
+    // Insert courses
+    const { error: coursesError } = await supabase
+      .from('user_courses')
+      .insert(courseInserts)
+
+    if (coursesError) throw coursesError
+
+    // Success - navigate to home
+    Alert.alert('Success!', 'Profile completed!', [
+      { text: 'OK', onPress: () => router.push('/HomePage') }
+    ])
+
+  } catch (error: any) {
+    Alert.alert('Error', error.message)
+  } finally {
+    setLoading(false)
+  }
+}
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
