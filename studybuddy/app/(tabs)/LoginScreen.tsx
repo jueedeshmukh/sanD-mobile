@@ -1,7 +1,9 @@
 import React, { useState } from 'react'
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native'
+import { useRouter } from 'expo-router'
 
 export default function LoginScreen({ onSignUpNav }: { onSignUpNav?: () => void }) {
+  const router = useRouter()
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -16,7 +18,8 @@ export default function LoginScreen({ onSignUpNav }: { onSignUpNav?: () => void 
 
   const handleSubmit = () => {
     console.log('Log in submitted:', formData)
-    // Add authentication logic here
+    router.replace('/OnboardingScreen')
+
   }
 
   return (
