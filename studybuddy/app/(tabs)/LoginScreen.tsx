@@ -1,9 +1,14 @@
 import React, { useState } from 'react'
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native'
+import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet, ScrollView } from 'react-native'
 import { useRouter } from 'expo-router'
+import { supabase } from '../supabaseClient'
+
 
 export default function LoginScreen({ onSignUpNav }: { onSignUpNav?: () => void }) {
   const router = useRouter()
+  const [error, setError] = useState(null)
+  const [message, setMessage] = useState(null)
+  const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -16,10 +21,23 @@ export default function LoginScreen({ onSignUpNav }: { onSignUpNav?: () => void 
     })
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     console.log('Log in submitted:', formData)
-    router.replace('/OnboardingScreen')
+    setLoading(true)
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: formData.email, 
+        password: formData.password,
+      })
+      if (error) throw error
 
+    } catch (error) {
+      setError(error.message)
+      Alert.alert('Error', error.message)
+    } finally {
+      setLoading(false)
+    }
+    router.replace('/Homepage')
   }
 
   return (

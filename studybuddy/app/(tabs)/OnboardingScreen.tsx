@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, FlatList } from 'react-native'
+import { useRouter } from 'expo-router'
 
 export default function OnboardingScreen({ onComplete }: { onComplete?: () => void }) {
   const [courses, setCourses] = useState<string[]>([])
@@ -7,6 +8,7 @@ export default function OnboardingScreen({ onComplete }: { onComplete?: () => vo
   const [isAdding, setIsAdding] = useState(false)
   const [college, setCollege] = useState('')
 
+  const router = useRouter()
   const colleges = ['Seventh', 'ERC', 'Marshall', 'Sixth', 'Muir', 'Revelle', 'Eight', 'Warren']
 
   const handleAddCourse = () => {
@@ -23,6 +25,7 @@ export default function OnboardingScreen({ onComplete }: { onComplete?: () => vo
 
   const handleSubmit = () => {
     console.log('Onboarding submitted:', { courses, college })
+    router.replace('/Homepage')
     if (onComplete) {
       onComplete()
     }

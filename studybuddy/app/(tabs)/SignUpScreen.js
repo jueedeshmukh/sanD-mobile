@@ -48,7 +48,7 @@ export default function SignUpScreen() {
 
       if (error) throw error
 
-      setMessage('Sign up successful! Please check your email to confirm your account.')
+      setMessage('Sign up successful!')
 
       // Clear form
       setFormData({
@@ -61,8 +61,8 @@ export default function SignUpScreen() {
       // Show success alert and navigate to login
       Alert.alert(
         'Success!', 
-        'Sign up successful! Check your email to confirm your account.',
-        [{ text: 'OK', onPress: () => router.push('/login') }]
+        'Sign up successful!',
+        [{ text: 'OK', onPress: () => router.push('/OnboardingScreen') }]
       )
 
     } catch (error) {
