@@ -38,17 +38,18 @@ export default function SignUpScreen() {
       // Sign up with Supabase
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            name: formData.name
-          }
-        }
+        password: formData.password
       })
 
       if (error) throw error
 
-      setMessage('Sign up successful!')
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert([{ id: data.user.id, name: formData.name, email: formData.email, college: null }])
+      
+        if (profileError) throw profileError
+
+      //setMessage('Sign up successful! Please check your email to confirm your account.')
 
       // Clear form
       setFormData({
@@ -58,10 +59,10 @@ export default function SignUpScreen() {
         confirmPassword: ''
       })
 
-      // Show success alert and navigate to login
+      // Show success alert and navigate to onboarding
       Alert.alert(
         'Success!', 
-        'Sign up successful!',
+        'Account created! Let\'s set up your profile',
         [{ text: 'OK', onPress: () => router.push('/OnboardingScreen') }]
       )
 
