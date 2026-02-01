@@ -1,25 +1,75 @@
 import React, { useState } from 'react'
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native'
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native'
+import { supabase } from '../supabaseClient'
+import { useRouter } from 'expo-router'
 
-export default function SignUpScreen({ onSignUp, onLoginNav }: { onSignUp?: () => void; onLoginNav?: () => void }) {
+export default function SignUpScreen() {
+  const router = useRouter()
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     confirmPassword: ''
   })
+  const [error, setError] = useState(null)
+  const [message, setMessage] = useState(null)
+  const [loading, setLoading] = useState(false)
 
-  const handleChange = (field: string, value: string) => {
+  const handleChange = (field, value) => {
     setFormData({
       ...formData,
       [field]: value
     })
   }
 
-  const handleSubmit = () => {
-    console.log('Sign up submitted:', formData)
-    if (onSignUp) {
-      onSignUp()
+  const handleSubmit = async () => {
+    setError(null)
+    setMessage(null)
+
+    // Check if passwords match
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match")
+      return
+    }
+
+    setLoading(true)
+
+    try {
+      // Sign up with Supabase
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            name: formData.name
+          }
+        }
+      })
+
+      if (error) throw error
+
+      setMessage('Sign up successful! Please check your email to confirm your account.')
+
+      // Clear form
+      setFormData({
+        name: '',
+        email: '',
+        password: '',
+        confirmPassword: ''
+      })
+
+      // Show success alert and navigate to login
+      Alert.alert(
+        'Success!', 
+        'Sign up successful! Check your email to confirm your account.',
+        [{ text: 'OK', onPress: () => router.push('/login') }]
+      )
+
+    } catch (error) {
+      setError(error.message)
+      Alert.alert('Error', error.message)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -75,13 +125,19 @@ export default function SignUpScreen({ onSignUp, onLoginNav }: { onSignUp?: () =
           />
         </View>
 
-        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-          <Text style={styles.buttonText}>Sign Up</Text>
+        <TouchableOpacity 
+          style={[styles.button, loading && styles.buttonDisabled]} 
+          onPress={handleSubmit}
+          disabled={loading}
+        >
+          <Text style={styles.buttonText}>
+            {loading ? 'Signing up...' : 'Sign Up'}
+          </Text>
         </TouchableOpacity>
 
         <View style={styles.toggleContainer}>
           <Text style={styles.toggleText}>Already have an account? </Text>
-          <TouchableOpacity onPress={onLoginNav}>
+          <TouchableOpacity onPress={() => router.push('/login')}>
             <Text style={styles.toggleLink}>Log In</Text>
           </TouchableOpacity>
         </View>
@@ -130,6 +186,9 @@ const styles = StyleSheet.create({
     padding: 12,
     alignItems: 'center',
     marginTop: 20
+  },
+  buttonDisabled: {
+    backgroundColor: '#999'
   },
   buttonText: {
     color: '#fff',

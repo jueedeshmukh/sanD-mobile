@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+
+/*import React, { useState } from 'react'
 
 import {
   View,
@@ -86,14 +87,14 @@ export default function SignUpScreen() {
         <View style={styles.formContainer}>
           <Text style={styles.title}>Sign Up</Text>
 
-          {/* Error message display */}
+          {Error message display }
           {error && (
             <View style={styles.errorContainer}>
               <Text style={styles.errorText}>{error}</Text>
             </View>
           )}
 
-          {/* Success message display */}
+          {/* Success message display }
           {message && (
             <View style={styles.successContainer}>
               <Text style={styles.successText}>{message}</Text>
@@ -241,3 +242,4 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
 })
+  */

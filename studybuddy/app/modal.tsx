@@ -1,3 +1,4 @@
+/*
 import { Link } from 'expo-router';
 import { StyleSheet } from 'react-native';
 
@@ -27,3 +28,4 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
   },
 });
+*/ 
